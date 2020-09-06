@@ -19,4 +19,5 @@ class MatrixSystem
 public:
 	size_t getSize() { return size; }
 	MatrixSystem(std::string path);
+	~MatrixSystem();
 };
