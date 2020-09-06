@@ -139,7 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ProfileMatrix.h" />
+    <ClInclude Include="MatrixSystem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MatrixSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
