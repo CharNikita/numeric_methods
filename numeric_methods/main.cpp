@@ -4,5 +4,6 @@ int main()
 {
 	std::string path = "input.txt";
 	auto ms = new MatrixSystem<int>(path);
-	return 0;
+	ms->ldu();
+   return 0;
 }
