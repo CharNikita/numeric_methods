@@ -11,14 +11,7 @@ MatrixSystem<T>::MatrixSystem(std::string path)
 }
 
 template<typename T>
-MatrixSystem<T>::~MatrixSystem()
-{
-   /*delete di;
-   delete ia;
-   delete al;
-   delete au;
-   delete b;*/
-}
+MatrixSystem<T>::~MatrixSystem() {}
 
 template <typename T>
 void MatrixSystem<T>::readFromFile(std::string path)
