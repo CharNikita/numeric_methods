@@ -47,7 +47,7 @@ void MatrixSystem<T>::readFromFile(std::string path)
 template <typename T>
 void MatrixSystem<T>::ldu()
 {
-   for (int i = 0; i < size; ++i)
+   for (size_t i = 0; i < size; ++i)
    {
       // sum for i-th row/column
       T sum = 0;
@@ -80,11 +80,7 @@ void MatrixSystem<T>::ldu()
             --kd;
          }
 
-         if (di[j] == 0)
-         {
-            std::cout << "ERROR: Could not manipulate with this matrix!";
-            return;
-         }
+         if (di[j] == 0) throw std::runtime_error("ERROR: Could not manipulate with this matrix!");
 
          au[k] = (au[k] - sum_au) / di[j];
          al[k] = (al[k] - sum_al) / di[j];
