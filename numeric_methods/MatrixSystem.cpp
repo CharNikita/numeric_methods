@@ -53,7 +53,7 @@ void MatrixSystem<T>::ldu()
       T sum = 0;
       // number of items for i-th row/column
       const int count = ia[i + 1] - ia[i];
-      // start position for 'al' and 'au'
+      // index of current elements in 'al' and 'au'
       int k = ia[i] - 1;
 
       for (int j = i - count; j < i; ++j)
@@ -61,27 +61,19 @@ void MatrixSystem<T>::ldu()
          // sums for j-th row/column
          T sum_al = 0;
          T sum_au = 0;
-         // current position for 'al' and 'au'
-         int numj = ia[j + 1] - ia[j];
 
-         const int max = numj < k - ia[i] ?
-            numj - 1 : k - ia[i] - 1;
-         
-         int fku = ia[j + 1] - 1;
-         // current position for 'al' for sum
-         int kl = k - 1;
-         // current position for 'al'
-         int kd = j - 1;
+         int i_row = ia[i + 1] - ia[i];
+         int j_row = ia[j + 1] - ia[j];
+         int min = j_row < i_row ? j_row : i_row;
 
-         if (kd > -1)
+         int kl = k - min;
+         int kd = k - min;
+         for (auto ku = k - min; ku < k - min + j - 1; ++ku)
          {
-            for (int ku = j - 1; ku > j - count; --ku)
-            {
-               sum_al += au[ku] * di[kd] * al[kl];
-               sum_au += al[ku] * di[kd] * au[kl];
-               --kl;
-               --kd;
-            }
+            sum_al += au[ku] * di[kd] * al[kl];
+            sum_au += al[ku] * di[kd] * au[kl];
+            ++kd;
+            ++kl;
          }
 
          if (di[j] == 0) throw std::runtime_error("ERROR: Could not manipulate with this matrix!");
@@ -92,20 +84,6 @@ void MatrixSystem<T>::ldu()
          ++k;
       }
 
-      di[i] -= sum;
-
-      /*if (ia[i + 1] > ia[i])
-      {
-         sum = 0;
-         for (size_t j = ia[i]; j < ia[i + 1]; ++j)
-         {
-            // sum +=
-            T l = al[j];
-            T u = au[j];
-            l = l - sum;
-
-         }
-      }*/
-      
+      di[i] -= sum;      
    }
 }
