@@ -72,12 +72,16 @@ void MatrixSystem<T>::ldu()
          int kl = k - 1;
          // current position for 'al'
          int kd = j - 1;
-         for (int ku = fku; ku > fku - max; --ku)
+
+         if (kd > -1)
          {
-            sum_al += au[ku] * di[kd] * al[kl];
-            sum_au += al[ku] * di[kd] * au[kl];
-            --kl;
-            --kd;
+            for (int ku = j - 1; ku > j - count; --ku)
+            {
+               sum_al += au[ku] * di[kd] * al[kl];
+               sum_au += al[ku] * di[kd] * au[kl];
+               --kl;
+               --kd;
+            }
          }
 
          if (di[j] == 0) throw std::runtime_error("ERROR: Could not manipulate with this matrix!");
