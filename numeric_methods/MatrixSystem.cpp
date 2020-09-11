@@ -47,16 +47,16 @@ void MatrixSystem<T>::readFromFile(std::string path)
 template <typename T>
 void MatrixSystem<T>::ldu()
 {
-   for (size_t i = 0; i < size; ++i)
+   for (auto i = 1; i < size; ++i)
    {
       // sum for i-th row/column
       T sum = 0;
       // number of items for i-th row/column
       const int count = ia[i + 1] - ia[i];
-      // index of current elements in 'al' and 'au'
+      // index of current element in 'al' and 'au'
       int k = ia[i] - 1;
 
-      for (int j = i - count; j < i; ++j)
+      for (auto j = i - count; j < i; ++j)
       {
          // sums for j-th row/column
          T sum_al = 0;
@@ -64,16 +64,17 @@ void MatrixSystem<T>::ldu()
 
          int i_row = ia[i + 1] - ia[i];
          int j_row = ia[j + 1] - ia[j];
-         int min = j_row < i_row ? j_row : i_row;
+         int min = j_row < i_row ? 
+            j_row - (i - count) : i_row - (i - count);
 
-         int kl = k - min;
-         int kd = k - min;
-         for (auto ku = k - min; ku < k - min + j - 1; ++ku)
+         int ki = k - min;
+         int kd = k - min - 1 - (i - count);
+         for (auto kj = k - min - 1; kj < k - min + j - 1 - (i - count); ++kj)
          {
-            sum_al += au[ku] * di[kd] * al[kl];
-            sum_au += al[ku] * di[kd] * au[kl];
+            sum_al += au[kj] * di[kd] * al[ki];
+            sum_au += al[kj] * di[kd] * au[ki];
             ++kd;
-            ++kl;
+            ++ki;
          }
 
          if (di[j] == 0) throw std::runtime_error("ERROR: Could not manipulate with this matrix!");
