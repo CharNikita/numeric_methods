@@ -106,3 +106,55 @@ void MatrixSystem<T>::ldu()
       di[i] -= sum;      
    }
 }
+
+template <typename T>
+void MatrixSystem<T>::forward_pass()
+{
+   for (int i = 0; i < size; ++i)
+   {
+      T sum = 0;
+      int k = ia[i] - 1;
+      int kx = i - (ia[i + 1] - ia[i]);
+      for (kx; kx < i; ++kx)
+      {
+         sum += al[k] * b[kx];
+         ++k;
+      }
+
+      b[i] -= sum;
+   }
+}
+
+template <typename T>
+void MatrixSystem<T>::central_pass()
+{
+   for (size_t i = 0; i < size; ++i)
+   {
+      if (di[i] == 0) throw std::runtime_error("Matrix cannot be factorized!");
+
+      b[i] /= di[i];
+   }
+}
+
+template <typename T>
+void MatrixSystem<T>::backward_pass()
+{
+   for (int i = size - 2; i >= 0; --i)
+   {
+      T sum = 0;
+      for (int j = size - 1; j > i; --j)
+      {
+         int count = ia[j + 1] - ia[j];
+         int ki = ia[j] - 1;
+
+         if (i - (j - count) < 0)
+            continue;
+
+         int k = ki + i - (j - count);
+
+         sum += au[k] * b[j];
+      }
+
+      b[i] -= sum;
+   }
+}

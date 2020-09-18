@@ -24,4 +24,7 @@ public:
 	~MatrixSystem();
 
 	void ldu();
+	void forward_pass();
+	void central_pass();
+	void backward_pass();
 };
