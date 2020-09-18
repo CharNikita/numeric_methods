@@ -147,12 +147,12 @@ void MatrixSystem<T>::backward_pass()
          int count = ia[j + 1] - ia[j];
          int ki = ia[j] - 1;
 
-         if (i - (j - count) < 0)
-            continue;
+         if (i - (j - count) >= 0)
+         {
+            int k = ki + i - (j - count);
 
-         int k = ki + i - (j - count);
-
-         sum += au[k] * b[j];
+            sum += au[k] * b[j];
+         }
       }
 
       b[i] -= sum;
