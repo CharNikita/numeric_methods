@@ -158,3 +158,15 @@ void MatrixSystem<T>::backward_pass()
       b[i] -= sum;
    }
 }
+
+template <typename T>
+void MatrixSystem<T>::output()
+{
+   std::ofstream fs;
+   fs.open("output.txt");
+
+   for (size_t i = 0; i < size; i++)
+      fs << std::fixed << b[i] << "\n";
+
+   fs.close();
+}

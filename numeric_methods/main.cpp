@@ -8,5 +8,7 @@ int main()
 	ms.forward_pass();
 	ms.central_pass();
 	ms.backward_pass();
+	ms.output();
+
    return 0;
 }

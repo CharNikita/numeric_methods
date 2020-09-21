@@ -27,4 +27,5 @@ public:
 	void forward_pass();
 	void central_pass();
 	void backward_pass();
+	void output();
 };
