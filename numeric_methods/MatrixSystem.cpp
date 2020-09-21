@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <string>
-#include <iostream>
 
 template <typename T>
 MatrixSystem<T>::MatrixSystem(std::string path)

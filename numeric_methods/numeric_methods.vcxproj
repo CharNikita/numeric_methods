@@ -139,9 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GaussMatrixSystem.h" />
     <ClInclude Include="MatrixSystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GaussMatrixSystem.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MatrixSystem.cpp" />
   </ItemGroup>
