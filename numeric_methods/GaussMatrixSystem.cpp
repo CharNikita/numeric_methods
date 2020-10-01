@@ -38,17 +38,20 @@ void GaussMatrixSystem<T>::gauss()
    for (int i = 1; i < size; ++i)
       for (int j = i; j < size; ++j)
       {
-
-         int mult = -M[j][i - 1] / M[i - 1][i - 1];
-
          if (M[i - 1][i - 1] == 0) throw std::runtime_error("Result cannot be calculated!");
 
-         for (int k = i - 1; k < size; ++k)
+         if (M[j][i - 1] != 0)
          {
-            M[j][k] += M[i - 1][k] * mult;
-         }
 
-         b[j] += b[i - 1] * mult;
+            T mult = -M[j][i - 1] / M[i - 1][i - 1];
+
+            for (int k = i - 1; k < size; ++k)
+            {
+               M[j][k] += M[i - 1][k] * mult;
+            }
+
+            b[j] += b[i - 1] * mult;
+         }
       }
 
    for (int i = size - 1; i >= 0; --i)
