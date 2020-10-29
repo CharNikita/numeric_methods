@@ -64,11 +64,11 @@ void MatrixSystem<T>::readFromFile(std::string path)
 
 // вычисление нормы в эвклидовом порстранстве
 template <typename T>
-T MatrixSystem<T>::norm(std::vector<T> x)
+T MatrixSystem<T>::norm(std::vector<T>& x)
 {
    T result = 0;
    for (int i = 0; i < n; i++)
-      result += pow(x[i], 2);
+      result += x[i] * x[i];
 
    result = sqrt(result);
 
@@ -77,7 +77,7 @@ T MatrixSystem<T>::norm(std::vector<T> x)
 
 //умножение вектора на вектор
 template <typename T>
-T MatrixSystem<T>::multVV(int flag, int i, std::vector<T> x0)
+T MatrixSystem<T>::multVV(int flag, int i, std::vector<T>& x0)
 {
    T result = 0;
    if (flag == 1 || flag == 3) //умножение нижнего треугольника матрицы
@@ -112,9 +112,8 @@ T MatrixSystem<T>::multVV(int flag, int i, std::vector<T> x0)
    return result;
 }
 
-// метод якоби
 template <typename T>
-T MatrixSystem<T>::jacobi(T w, std::vector<T>& x1, T& loss)
+T MatrixSystem<T>::jacobiGaussZeidel(T w, std::vector<T>& x1, T& loss, int flag)
 {
    T sum = 0;
    T buf = 0;
@@ -122,29 +121,12 @@ T MatrixSystem<T>::jacobi(T w, std::vector<T>& x1, T& loss)
 
    for (int i = 0; i < n; i++)
    {
-      sum = multVV(3, i, x);
-      buf = b[i] - sum;
-      x1[i] = x[i] + w * buf / di[i];
-      loss += pow(buf, 2);
-   }
-   loss = sqrt(loss) / normb;
-
-   return loss;
-}
-
-template <typename T>
-T MatrixSystem<T>::gaussZeidel(T w, std::vector<T>& x1, T& loss)
-{
-   T sum = 0;
-   T buf = 0;
-   loss = 0;
-
-   for (int i = 0; i < n; i++)
-   {
-      sum = multVV(2, i, x) + multVV(1, i, x1);
+      sum = multVV(flag, i, x);
+      if(flag == 2)
+         sum += multVV(1, i, x1);
       buf = b[i] - sum;
       x1[i] = x[i] + (w / di[i]) * buf;
-      loss += pow(buf, 2);
+      loss += buf * buf;
    }
    loss = sqrt(loss) / normb;
 
@@ -153,7 +135,7 @@ T MatrixSystem<T>::gaussZeidel(T w, std::vector<T>& x1, T& loss)
 
 // подсчет числа обусловленностей для метода якоби и гаусса-зейделя
 template <typename T>
-T MatrixSystem<T>::num_obusl(std::vector<T> x, T loss, T normxstar)
+T MatrixSystem<T>::num_obusl(std::vector<T>& x, T loss, T normxstar)
 {
    T obusl;
    for (size_t i = 0; i < n; i++)
@@ -168,7 +150,7 @@ T MatrixSystem<T>::num_obusl(std::vector<T> x, T loss, T normxstar)
 
 // метод якоби (flag = false) и гаусса-зейделя (flag = true)
 template <typename T>
-void MatrixSystem<T>::iteration(std::string path, bool flag)
+void MatrixSystem<T>::iteration(std::string path, int flag)
 {
    T obusl = 0;
    T w = 0;
@@ -182,28 +164,19 @@ void MatrixSystem<T>::iteration(std::string path, bool flag)
 
    size_t  t;
    for (size_t i = 1; i <= n; i++)
-      normxstar += pow(i, 2);
+      normxstar += i * i;
 
    normxstar = sqrt(normxstar);
    std::vector<T> buf(n);
-   for (int i = 171; i <= 175; i += 1)
+   for (int i = 170; i <= 175; i += 1)
    {
       w = i / 100.0;
       int exit = 0;
       std::cout << w << std::endl;
       for (t = 0; t < max_iter && exit != 1; t++)
-      {
-         if (flag == false)
-         {
-            jacobi(w, buf, loss);
-            x.swap(buf);
-         }
-
-         if (flag == true)
-         {
-            gaussZeidel(w, buf, loss);
-            x.swap(buf);
-         }
+      {         
+         jacobiGaussZeidel(w, buf, loss, flag);
+         x.swap(buf);
 
          if (loss < eps)
          {

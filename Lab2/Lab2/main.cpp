@@ -1,5 +1,4 @@
 #include "MatrixSystem.cpp"
-//#include "GaussMatrixSystem.cpp"
 
 #include <iostream>
 
@@ -8,7 +7,7 @@ int main()
 	std::string path = "input.txt";
 	auto ms = MatrixSystem<double>(path);
 
-	ms.iteration("output.txt", true);
+	ms.iteration("output.txt", 2);
 
    //double w = 0;
    //double obusl;

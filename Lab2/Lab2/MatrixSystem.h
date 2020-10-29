@@ -27,12 +27,13 @@ public:
 
 	MatrixSystem(std::string path);
 
-	T norm(std::vector<T> x);
-	T multVV(int flag, int i, std::vector<T> x0);
+	T norm(std::vector<T>& x);
+	T multVV(int flag, int i, std::vector<T>& x0);
 	T jacobi(T w, std::vector<T>& x1, T& loss);
 	T gaussZeidel(T w, std::vector<T>& x1, T& loss);
-	T num_obusl(std::vector<T> x, T loss, T normxstar);
-	void iteration(std::string path, bool flag);
+	T jacobiGaussZeidel(T w, std::vector<T>& x1, T& loss, int flag);
+	T num_obusl(std::vector<T>& x, T loss, T normxstar);
+	void iteration(std::string path, int flag);
 	void lu();
 	void output();
 };
