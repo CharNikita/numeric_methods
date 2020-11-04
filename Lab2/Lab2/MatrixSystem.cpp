@@ -5,13 +5,13 @@
 #include <string>
 
 template <typename T>
-MatrixSystem<T>::MatrixSystem(std::string path)
+MatrixSystem<T>::MatrixSystem(std::string& path)
 {
    readFromFile(path);
 }
 
 template <typename T>
-void MatrixSystem<T>::readFromFile(std::string path)
+void MatrixSystem<T>::readFromFile(std::string& path)
 {
    std::fstream fs;
    fs.precision(17);
@@ -113,7 +113,7 @@ T MatrixSystem<T>::multVV(int flag, int i, std::vector<T>& x0)
 }
 
 template <typename T>
-T MatrixSystem<T>::jacobiGaussZeidel(T w, std::vector<T>& x1, T& loss, int flag)
+T MatrixSystem<T>::jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag)
 {
    T sum = 0;
    T buf = 0;
@@ -138,7 +138,7 @@ template <typename T>
 T MatrixSystem<T>::num_obusl(std::vector<T>& x, T loss, T normxstar)
 {
    T obusl;
-   for (size_t i = 0; i < n; i++)
+   for (int i = 0; i < n; i++)
    {
       x[i] -= i + 1;
    }
@@ -148,17 +148,16 @@ T MatrixSystem<T>::num_obusl(std::vector<T>& x, T loss, T normxstar)
 
 }
 
-// метод якоби (flag = false) и гаусса-зейделя (flag = true)
+// метод якоби (flag = 3) и гаусса-зейделя (flag = 2)
 template <typename T>
-void MatrixSystem<T>::iteration(std::string path, int flag)
+void MatrixSystem<T>::iteration(std::string& path, int flag)
 {
    T obusl = 0;
    T w = 0;
    T loss = 0;
    T normxstar = 0;
    std::ofstream fs;
-   //std::locale mylocale("");
-   fs.open("output.txt");
+   fs.open(path);
    fs.imbue(std::locale("Russian"));
    fs.precision(17);
 
@@ -175,7 +174,7 @@ void MatrixSystem<T>::iteration(std::string path, int flag)
       std::cout << w << std::endl;
       for (t = 0; t < max_iter && exit != 1; t++)
       {         
-         jacobiGaussZeidel(w, buf, loss, flag);
+         jacobi_gauss_zeidel(w, buf, loss, flag);
          x.swap(buf);
 
          if (loss < eps)
@@ -212,10 +211,9 @@ void MatrixSystem<T>::iteration(std::string path, int flag)
 
 
 template <typename T>
-void MatrixSystem<T>::lu()
+void MatrixSystem<T>::lu_factorization()
 {
-   //int block_count = n / block_size;
-   for (int i = 0; i < n / block_size; i++)
+   for (size_t i = 0; i < n / block_size; i++)
    {
       int k = block_size - 1 + i * block_size;
       for (int j = i * block_size; j < k; j++)
@@ -226,14 +224,190 @@ void MatrixSystem<T>::lu()
    }
 }
 
+// решение слау прямым и обратным ходом для блока
 template <typename T>
-void MatrixSystem<T>::output()
+void MatrixSystem<T>::lu_solution(std::vector<T>& x0, int block_amt, T w)
 {
-   std::ofstream fs;
-   fs.open("output.txt");
+   int j = (block_amt + 1) * block_size;
+   for (size_t i = block_amt * block_size; i < j; i++)
+      x0[i] *= w;
+   int c = block_amt * block_size;
+   x0[c] /= di[c];
+   for (size_t i = c + 1; i < j; i++)
+   {
+      x0[i] -= x0[i - 1] * al[0][i - 1];
+      if (di[i] == 0.0)
+         throw 2;
+      x0[i] /= di[i];
+   }
+   for (int i = j - 2; i >= j - block_size && i > -1; i--)
+   {
+      x0[i] -= au[0][i] * x0[i + 1];
+   }
 
-   for (size_t i = 0; i < n; i++)
-      fs << std::fixed << x[i] << "\n";
+}
+
+// метод блочной релаксации: одна итерация
+template <typename T>
+void MatrixSystem<T>::block_iteration(T w, std::vector<T>& xkp, T& loss_bl)
+{
+   T sum = 0;
+   T buf = 0;
+   loss_bl = 0;
+   xkp = x;
+   for (int i = 0; i < n / block_size; i++)
+   {
+      multBV(i, xkp); // sum Aki*Xk k = 1 to block_amt 
+      int end = (i + 1) * block_size;
+      for (int k = i * block_size; k < end; k++)
+      {
+         xkp[k] = b[k] - xkp[k]; // F - sum Aki*Xk k = 1 to block_amt 
+      }
+      lu_solution(xkp, i, w); // AiiYi = xkpi 
+      for (int k = i * block_size; k < end; k++)
+      {
+         xkp[k] += (1 - w) * x[k]; // Xk+1 = Yk + (1 - w) * Xk
+      }
+   }
+   loss_bl = norm(x);
+   loss_bl = deltanorm(xkp, x) / loss_bl;
+
+}
+
+// метод блочной релаксации: получение решения
+template <typename T>
+void MatrixSystem<T>::block_relaxation(std::string& path, T w)
+{
+   if (n % block_size != 0)
+      throw 1;
+   T loss = 0;
+   for (int k = 0; k < n; k++)
+      x[k] = 0;
+
+   std::vector<T> buf(n);
+   size_t j = 0;
+
+   std::ofstream fs;
+   fs.open(path);
+   fs.imbue(std::locale("Russian"));
+   fs.precision(17);
+
+   std::cout << w << std::endl;
+   for (j = 0; j < max_iter; j++)
+   {
+      block_iteration(w, buf, loss);
+      x.swap(buf);
+      if (loss < eps)
+      {
+         std::cout << "End iter:" << j << std::endl;
+         break;
+      }
+      if (j % 1000 == 0)
+      {
+         std::cout << "iter: " << j << std::endl;
+         std::cout << "loss: " << loss << std::endl;
+      }
+   }
+   fs << w << "\t" << x[0] << "\t" << j + 1 << "\t" << loss << std::endl;
+   for (j = 1; j < n; j++)
+   {
+      fs << "\t" << x[j] << std::endl;
+   }
+   fs << std::endl;
 
    fs.close();
+
+}
+
+// подсчет числа обусловленностей для метода блочной релаксации
+template <typename T>
+T MatrixSystem<T>::num_bl_obusl()
+{
+   T obusl = 0;
+   T b = 0;
+   T sum = 0;
+   std::vector<T> buf(n);
+   multMV(x, buf);
+   for (int i = 0; i < n; i++)
+   {
+      b = b[i] - buf[i];
+      sum += b * b;
+   }
+   obusl = sqrt(sum);
+   obusl = obusl / normb;
+   sum = 0;
+   for (int i = 0; i < n; i++)
+   {
+      b = x[i] - (i + 1);
+      sum += b * b;
+   }
+   sum = sqrt(sum);
+   obusl = (sum / sqrt(650.0)) / obusl;
+   return obusl;
+}
+
+// норма разности двух векторов
+template <typename T>
+T MatrixSystem<T>::deltanorm(std::vector<T> x, std::vector<T> y)
+{
+   T norma = 0;
+   for (size_t i = 0; i < n; i++)
+      norma += (x[i] - y[i]) * (x[i] - y[i]);
+
+   norma = sqrt(norma);
+   return norma;
+
+}
+
+// умножение матрицы на вектор
+template <typename T>
+void MatrixSystem<T>::multMV(std::vector<T>& x, std::vector<T>& res)
+{
+   for (int i = 0; i < n; i++)
+      res[i] = multVV(3, i, x);
+}
+
+// умножение блоков на вектор
+template <typename T>
+void MatrixSystem<T>::multBV(int blocknumber, std::vector<T>& xkp)
+{
+   int j = block_size * blocknumber;
+   int y = j;
+   for (int l = 0; l < block_size; l++, y++)
+   {
+      xkp[y] = 0;
+   }
+   if (j > 0)
+   {
+      xkp[j] += al[0][j - 1] * xkp[j - 1];
+   }
+   for (int l = 0; l < block_size; l++, j++)
+   {
+      //умножение нижнего треугольника матрицы
+      if (j > m + 1)
+      {
+         xkp[j] += al[1][j - m - 2] * xkp[j - m - 2];
+         if (j > m + k + 2)
+         {
+            xkp[j] += al[2][j - m - k - 3] * xkp[j - m - k - 3];
+         }
+      }
+
+      // умножение верхнего треугольника матрицы
+      if (j < n - m - 2)
+      {
+         xkp[j] += au[1][j] * xkp[j + m + 2];
+         if (j < n - m - k - 3)
+         {
+            xkp[j] += au[2][j] * xkp[j + m + k + 3];
+         }
+      }
+
+   }
+   j--;
+   if (j < n - 1)
+   {
+      xkp[j] += au[0][j] * xkp[j + 1];
+   }
+
 }

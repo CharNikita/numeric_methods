@@ -19,21 +19,25 @@ class MatrixSystem
 	size_t block_size;
 	T normb;
 
-	void readFromFile(std::string path);
+	void readFromFile(std::string& path);
 	MatrixSystem();
 
 public:
 	size_t getSize() { return n; }
 
-	MatrixSystem(std::string path);
+	MatrixSystem(std::string& path);
 
 	T norm(std::vector<T>& x);
 	T multVV(int flag, int i, std::vector<T>& x0);
-	T jacobi(T w, std::vector<T>& x1, T& loss);
-	T gaussZeidel(T w, std::vector<T>& x1, T& loss);
-	T jacobiGaussZeidel(T w, std::vector<T>& x1, T& loss, int flag);
+	T jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag);
 	T num_obusl(std::vector<T>& x, T loss, T normxstar);
-	void iteration(std::string path, int flag);
-	void lu();
-	void output();
+	void iteration(std::string& path, int flag);
+	void lu_factorization();
+	void lu_solution(std::vector<T>& x0, int block_amt, T w);
+	T num_bl_obusl();
+	T deltanorm(std::vector<T> x, std::vector<T> y);
+	void multMV(std::vector<T>& x, std::vector<T>& res);
+	void multBV(int blocknumber, std::vector<T>& xkp);
+	void block_iteration(T w, std::vector<T>& xkp, T& loss_bl);
+	void block_relaxation(std::string& path, T w);
 };
