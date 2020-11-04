@@ -30,7 +30,7 @@ public:
 	T norm(std::vector<T>& x);
 	T multVV(int flag, int i, std::vector<T>& x0);
 	T jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag);
-	T num_obusl(std::vector<T>& x, T loss, T normxstar);
+	T num_obusl(std::vector<T> x, T loss, T normxstar);
 	void iteration(std::string& path, int flag);
 	void lu_factorization();
 	void lu_solution(std::vector<T>& x0, int block_amt, T w);

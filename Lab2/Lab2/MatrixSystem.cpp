@@ -135,7 +135,7 @@ T MatrixSystem<T>::jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int fla
 
 // подсчет числа обусловленностей для метода якоби и гаусса-зейделя
 template <typename T>
-T MatrixSystem<T>::num_obusl(std::vector<T>& x, T loss, T normxstar)
+T MatrixSystem<T>::num_obusl(std::vector<T> x, T loss, T normxstar)
 {
    T obusl;
    for (int i = 0; i < n; i++)
