@@ -112,6 +112,7 @@ T MatrixSystem<T>::multVV(int flag, int i, std::vector<T>& x0)
    return result;
 }
 
+// объединение методов якоби (flag = 3) и √аусса-«ейдел€ (flag = 2)
 template <typename T>
 T MatrixSystem<T>::jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag)
 {
@@ -139,13 +140,12 @@ T MatrixSystem<T>::num_obusl(std::vector<T> x, T loss, T normxstar)
 {
    T obusl;
    for (int i = 0; i < n; i++)
-   {
       x[i] -= i + 1;
-   }
-   obusl = norm(x);
-   obusl = (obusl / normxstar) / loss;
-   return obusl;
 
+   obusl = norm(x);
+   obusl = obusl / normxstar / loss;
+
+   return obusl;
 }
 
 // метод €коби (flag = 3) и гаусса-зейдел€ (flag = 2)
@@ -170,18 +170,17 @@ void MatrixSystem<T>::iteration(std::string& path, int flag)
    for (int i = 170; i <= 175; i += 1)
    {
       w = i / 100.0;
-      int exit = 0;
       std::cout << w << std::endl;
-      for (t = 0; t < max_iter && exit != 1; t++)
+      for (t = 0; t < max_iter; t++)
       {         
          jacobi_gauss_zeidel(w, buf, loss, flag);
          x.swap(buf);
 
          if (loss < eps)
          {
-            exit = 1;
             std::cout << "End iter:" << t << std::endl;
             std::cout << "EXIT" << std::endl;
+            break;
          }
 
          obusl = num_obusl(x, loss, normxstar);
