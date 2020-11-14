@@ -8,7 +8,7 @@ int main()
 	std::string out = "output.txt";
 	auto ms = MatrixSystem<double>(in);
 
-	ms.iteration(out, 2);
+	ms.iteration(out, false);
 
    //double w = 0;
    double obusl;

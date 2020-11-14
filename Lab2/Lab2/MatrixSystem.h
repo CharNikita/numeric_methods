@@ -11,6 +11,7 @@ class MatrixSystem
 	std::vector<std::vector<T>> au;
 	std::vector<T> b;
 	std::vector<T> x;
+	std::vector<T> buf;
 	size_t n;
 	size_t m;
 	size_t k;
@@ -29,9 +30,10 @@ public:
 
 	T norm(std::vector<T>& x);
 	T multVV(int flag, int i, std::vector<T>& x0);
-	T jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag);
+	T jacobi(T w, std::vector<T>& x1, T& loss);
+	T gauss_zeidel(T w, T& loss);
 	T num_obusl(std::vector<T> x, T loss, T normxstar);
-	void iteration(std::string& path, int flag);
+	void iteration(std::string& path, bool flag);
 	void lu_factorization();
 	void lu_solution(std::vector<T>& x0, int block_amt, T w);
 	T num_bl_obusl();

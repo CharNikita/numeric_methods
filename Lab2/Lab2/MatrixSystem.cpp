@@ -57,6 +57,7 @@ void MatrixSystem<T>::readFromFile(std::string& path)
       fs >> b[i];
 
    x.resize(n);
+   buf.resize(n);
 
    normb = norm(b);
    fs.close();
@@ -112,9 +113,9 @@ T MatrixSystem<T>::multVV(int flag, int i, std::vector<T>& x0)
    return result;
 }
 
-// объединение методов якоби (flag = 3) и √аусса-«ейдел€ (flag = 2)
+// метод €коби
 template <typename T>
-T MatrixSystem<T>::jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int flag)
+T MatrixSystem<T>::jacobi(T w, std::vector<T>& x1, T& loss)
 {
    T sum = 0;
    T buf = 0;
@@ -122,11 +123,29 @@ T MatrixSystem<T>::jacobi_gauss_zeidel(T w, std::vector<T>& x1, T& loss, int fla
 
    for (int i = 0; i < n; i++)
    {
-      sum = multVV(flag, i, x);
-      if(flag == 2)
-         sum += multVV(1, i, x1);
+      sum = multVV(3, i, x);
       buf = b[i] - sum;
       x1[i] = x[i] + (w / di[i]) * buf;
+      loss += buf * buf;
+   }
+   loss = sqrt(loss) / normb;
+
+   return loss;
+}
+
+// метод гаусса-зейдел€
+template <typename T>
+T MatrixSystem<T>::gauss_zeidel(T w, T& loss)
+{
+   T sum = 0;
+   T buf = 0;
+   loss = 0;
+
+   for (int i = 0; i < n; i++)
+   {
+      sum = multVV(2, i, x) + multVV(1, i, x);
+      buf = b[i] - sum;
+      x[i] = x[i] + (w / di[i]) * buf;
       loss += buf * buf;
    }
    loss = sqrt(loss) / normb;
@@ -148,9 +167,9 @@ T MatrixSystem<T>::num_obusl(std::vector<T> x, T loss, T normxstar)
    return obusl;
 }
 
-// метод €коби (flag = 3) и гаусса-зейдел€ (flag = 2)
+// метод €коби (flag = false) и гаусса-зейдел€ (flag = true)
 template <typename T>
-void MatrixSystem<T>::iteration(std::string& path, int flag)
+void MatrixSystem<T>::iteration(std::string& path, bool flag)
 {
    T obusl = 0;
    T w = 0;
@@ -166,15 +185,19 @@ void MatrixSystem<T>::iteration(std::string& path, int flag)
       normxstar += i * i;
 
    normxstar = sqrt(normxstar);
-   std::vector<T> buf(n);
-   for (int i = 170; i <= 175; i += 1)
+   for (int i = 100; i <= 105; i += 1)
    {
       w = i / 100.0;
       std::cout << w << std::endl;
       for (t = 0; t < max_iter; t++)
       {         
-         jacobi_gauss_zeidel(w, buf, loss, flag);
-         x.swap(buf);
+         if (flag)
+            gauss_zeidel(w, loss);
+         else
+         {
+            jacobi(w, buf, loss);
+            x.swap(buf);
+         }
 
          if (loss < eps)
          {
