@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <ctime>
 
 template <typename T>
 MatrixSystem<T>::MatrixSystem(std::string& path)
@@ -185,8 +186,9 @@ void MatrixSystem<T>::iteration(std::string& path, bool flag)
       normxstar += i * i;
 
    normxstar = sqrt(normxstar);
-   for (int i = 100; i <= 105; i += 1)
+   for (int i = 131; i <= 133; i += 1)
    {
+      clock_t start = clock();
       w = i / 100.0;
       std::cout << w << std::endl;
       for (t = 0; t < max_iter; t++)
@@ -202,6 +204,8 @@ void MatrixSystem<T>::iteration(std::string& path, bool flag)
          if (loss < eps)
          {
             std::cout << "End iter:" << t << std::endl;
+            clock_t finish = clock();
+            std::cout << "Time: " << finish - start << std::endl;
             std::cout << "EXIT" << std::endl;
             break;
          }

@@ -4,11 +4,11 @@
 
 int main()
 {
-	std::string in = "input.txt";
+	std::string in = "input2.txt";
 	std::string out = "output.txt";
 	auto ms = MatrixSystem<double>(in);
 
-	ms.iteration(out, false);
+	ms.iteration(out, true);
 
    //double w = 0;
    double obusl;
