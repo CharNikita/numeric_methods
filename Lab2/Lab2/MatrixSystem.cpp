@@ -64,6 +64,19 @@ void MatrixSystem<T>::readFromFile(std::string& path)
    fs.close();
 }
 
+
+template <typename T>
+std::vector<T> MatrixSystem<T>::get_x()
+{
+   return x;
+}
+
+template <typename T>
+void MatrixSystem<T>::set_x(std::vector<T> x)
+{
+   this->x = x;
+}
+
 // вычисление нормы в эвклидовом порстранстве
 template <typename T>
 T MatrixSystem<T>::norm(std::vector<T>& x)
@@ -186,7 +199,7 @@ void MatrixSystem<T>::iteration(std::string& path, bool flag)
       normxstar += i * i;
 
    normxstar = sqrt(normxstar);
-   for (int i = 131; i <= 133; i += 1)
+   for (int i = 170; i <= 175; i += 1)
    {
       clock_t start = clock();
       w = i / 100.0;
@@ -302,7 +315,7 @@ void MatrixSystem<T>::block_iteration(T w, std::vector<T>& xkp, T& loss_bl)
 
 // метод блочной релаксации: получение решения
 template <typename T>
-void MatrixSystem<T>::block_relaxation(std::string& path, T w)
+void MatrixSystem<T>::block_relaxation(std::ofstream& fs, T w)
 {
    if (n % block_size != 0)
       throw 1;
@@ -312,11 +325,6 @@ void MatrixSystem<T>::block_relaxation(std::string& path, T w)
 
    std::vector<T> buf(n);
    size_t j = 0;
-
-   std::ofstream fs;
-   fs.open(path);
-   fs.imbue(std::locale("Russian"));
-   fs.precision(17);
 
    std::cout << w << std::endl;
    for (j = 0; j < max_iter; j++)
@@ -328,20 +336,18 @@ void MatrixSystem<T>::block_relaxation(std::string& path, T w)
          std::cout << "End iter:" << j << std::endl;
          break;
       }
-      if (j % 1000 == 0)
+      if (j % 100 == 99)
       {
-         std::cout << "iter: " << j << std::endl;
+         std::cout << "iter: " << j + 1 << std::endl;
          std::cout << "loss: " << loss << std::endl;
       }
    }
+
    fs << w << "\t" << x[0] << "\t" << j + 1 << "\t" << loss << std::endl;
    for (j = 1; j < n; j++)
    {
       fs << "\t" << x[j] << std::endl;
    }
-   fs << std::endl;
-
-   fs.close();
 
 }
 
@@ -350,22 +356,22 @@ template <typename T>
 T MatrixSystem<T>::num_bl_obusl()
 {
    T obusl = 0;
-   T b = 0;
+   T r = 0;
    T sum = 0;
-   std::vector<T> buf(n);
+   
    multMV(x, buf);
    for (int i = 0; i < n; i++)
    {
-      b = b[i] - buf[i];
-      sum += b * b;
+      r = b[i] - buf[i];
+      sum += r * r;
    }
    obusl = sqrt(sum);
    obusl = obusl / normb;
    sum = 0;
    for (int i = 0; i < n; i++)
    {
-      b = x[i] - (i + 1);
-      sum += b * b;
+      r = x[i] - (i + 1);
+      sum += r * r;
    }
    sum = sqrt(sum);
    obusl = (sum / sqrt(650.0)) / obusl;

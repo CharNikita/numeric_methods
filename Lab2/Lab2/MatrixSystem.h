@@ -24,10 +24,12 @@ class MatrixSystem
 	MatrixSystem();
 
 public:
-	size_t getSize() { return n; }
+	size_t get_size() { return n; }
 
 	MatrixSystem(std::string& path);
 
+	std::vector<T> get_x();
+	void set_x(std::vector<T> x);
 	T norm(std::vector<T>& x);
 	T multVV(int flag, int i, std::vector<T>& x0);
 	T jacobi(T w, std::vector<T>& x1, T& loss);
@@ -41,5 +43,5 @@ public:
 	void multMV(std::vector<T>& x, std::vector<T>& res);
 	void multBV(int blocknumber, std::vector<T>& xkp);
 	void block_iteration(T w, std::vector<T>& xkp, T& loss_bl);
-	void block_relaxation(std::string& path, T w);
+	void block_relaxation(std::ofstream& path, T w);
 };
